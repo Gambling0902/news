@@ -1,0 +1,621 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>FOMC Live — Fokus Gold, 16-17 Sept 2026</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600&family=JetBrains+Mono:wght@400;500;600;700&display=swap');
+
+  :root{
+    --bg: #0a0a0a;
+    --panel: #131311;
+    --panel-2: #17170f;
+    --line: #2a2a22;
+    --ink: #ece7d8;
+    --ink-dim: #9a9584;
+    --ink-faint: #625d4f;
+    --gold: #c9a227;
+    --gold-bright: #e8c34a;
+    --up: #6fbf73;
+    --down: #d9694f;
+    --warn: #d9a34f;
+  }
+
+  *{ box-sizing: border-box; }
+  html,body{ margin:0; padding:0; background: var(--bg); }
+  body{
+    color: var(--ink);
+    font-family: 'JetBrains Mono', ui-monospace, monospace;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+  }
+  ::selection{ background: var(--gold); color: #0a0a0a; }
+
+  a{ color: var(--gold-bright); }
+
+  .wrap{ max-width: 920px; margin: 0 auto; padding: 0 20px 90px; }
+
+  /* ---------- top bar ---------- */
+  .topbar{
+    display:flex; justify-content:space-between; align-items:center;
+    padding: 16px 20px; border-bottom: 1px solid var(--line);
+    font-size: 12px; letter-spacing: .03em; color: var(--ink-dim);
+    max-width: 920px; margin: 0 auto;
+  }
+  .live-pulse{ display:inline-block; width:7px; height:7px; border-radius:50%; background: var(--down); margin-right:6px; animation: pulse 1.6s infinite; }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.25;} }
+
+  /* ---------- AI update bar ---------- */
+  .ai-bar{
+    margin-top: 20px; border: 1px solid var(--line); background: var(--panel);
+    padding: 16px 18px; display:flex; align-items:center; justify-content:space-between; gap: 14px; flex-wrap: wrap;
+  }
+  .ai-left{ font-size: 12px; color: var(--ink-dim); max-width: 60ch; }
+  .ai-left b{ color: var(--ink); }
+  #ai-status{ font-size: 11px; color: var(--ink-faint); margin-top: 4px; }
+  .ai-btn{
+    background: var(--gold); color: #0a0a0a; border: none; font-family: 'JetBrains Mono', monospace;
+    font-weight: 700; font-size: 13px; padding: 12px 22px; cursor: pointer; letter-spacing: .02em;
+    white-space: nowrap;
+  }
+  .ai-btn:hover{ background: var(--gold-bright); }
+  .ai-btn:disabled{ background: var(--ink-faint); color: #0a0a0a; cursor: wait; }
+  .spin{ display:inline-block; width:10px; height:10px; border-radius:50%; border: 2px solid #0a0a0a55; border-top-color:#0a0a0a; animation: spin .7s linear infinite; margin-right:6px; vertical-align:-1px; }
+  @keyframes spin{ to{ transform: rotate(360deg); } }
+
+  /* ---------- hero ---------- */
+  .hero{ padding: 40px 0 8px; }
+  .hero-date{ font-size: 12px; color: var(--ink-faint); letter-spacing: .04em; margin-bottom: 14px; }
+  h1{
+    font-family: 'Fraunces', Georgia, serif;
+    font-weight: 500;
+    font-optical-sizing: auto;
+    font-size: 44px;
+    line-height: 1.08;
+    margin: 0 0 14px;
+    color: var(--ink);
+  }
+  h1 em{ font-style: italic; color: var(--gold-bright); }
+  .hero-sub{ color: var(--ink-dim); font-size: 14px; max-width: 62ch; margin-bottom: 30px; }
+  .hero-sub b{ color: var(--ink); font-weight: 600; }
+
+  /* countdown */
+  .countdown{ display:flex; gap: 10px; margin-bottom: 30px; flex-wrap: wrap; }
+  .cd-box{ background: var(--panel); border: 1px solid var(--line); padding: 14px 18px; min-width: 84px; text-align:center; }
+  .cd-num{ font-size: 26px; font-weight: 700; color: var(--gold-bright); font-variant-numeric: tabular-nums; }
+  .cd-label{ font-size: 10px; color: var(--ink-faint); letter-spacing: .08em; margin-top: 4px; }
+  .cd-flag{ font-size: 11px; color: var(--ink-dim); margin-bottom: 12px; }
+
+  /* snapshot grid */
+  .grid4{ display:grid; grid-template-columns: repeat(4, 1fr); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+  .snap{ background: var(--panel); padding: 16px 16px 18px; transition: background .3s; }
+  .snap.flash{ background: #21200f; }
+  .snap-label{ font-size: 10px; color: var(--ink-faint); letter-spacing: .08em; margin-bottom: 10px; }
+  .snap-val{ font-size: 24px; font-weight: 700; color: var(--ink); font-variant-numeric: tabular-nums; }
+  .snap-chg{ font-size: 12px; margin-top: 6px; }
+  .up{ color: var(--up); } .down{ color: var(--down); } .flat{ color: var(--ink-dim); }
+
+  @media (max-width: 640px){
+    .grid4{ grid-template-columns: repeat(2, 1fr); }
+    h1{ font-size: 32px; }
+  }
+
+  .snapshot-note{ font-size: 11px; color: var(--ink-faint); margin-top: 10px; }
+
+  .chart-link{
+    display:flex; justify-content:space-between; align-items:center;
+    border: 1px solid var(--line); padding: 14px 18px; margin-top: 18px;
+    text-decoration: none; color: var(--ink);
+  }
+  .chart-link:hover{ border-color: var(--gold); }
+  .chart-link .cl-title{ font-size: 13px; color: var(--ink); }
+  .chart-link .cl-sub{ font-size: 11px; color: var(--ink-faint); margin-top: 3px; }
+  .chart-link .arrow{ color: var(--gold-bright); font-size: 16px; }
+
+  /* ---------- sections ---------- */
+  section{ margin-top: 62px; }
+  .sec-head{ display:flex; align-items:baseline; gap: 10px; margin-bottom: 22px; }
+  .sec-num{ font-size: 12px; color: var(--gold); }
+  .sec-title{ font-family: 'Fraunces', Georgia, serif; font-size: 22px; font-weight: 500; color: var(--ink); }
+  .sec-rule{ flex:1; height:1px; background: var(--line); }
+
+  /* live news */
+  .news-list{ display:flex; flex-direction:column; }
+  .news-item{ padding: 16px 0; border-bottom: 1px solid var(--line); }
+  .news-time{ font-size: 11px; color: var(--gold-bright); }
+  .news-title{ font-family: 'Fraunces', Georgia, serif; font-size: 16px; margin: 5px 0 5px; color: var(--ink); }
+  .news-desc{ font-size: 12.5px; color: var(--ink-dim); }
+  .news-empty{ font-size: 12.5px; color: var(--ink-faint); font-style: italic; }
+
+  /* jadwal */
+  .timeline{ border-left: 1px solid var(--line); margin-left: 6px; }
+  .tl-item{ position: relative; padding: 2px 0 26px 26px; }
+  .tl-item::before{ content:''; position:absolute; left:-5px; top: 4px; width:9px; height:9px; border-radius:50%; background: var(--bg); border: 2px solid var(--ink-faint); }
+  .tl-item.hot::before{ border-color: var(--gold-bright); background: var(--gold-bright); }
+  .tl-time{ font-size: 12px; color: var(--gold-bright); font-weight: 600; }
+  .tl-title{ font-family: 'Fraunces', Georgia, serif; font-size: 17px; margin: 4px 0 6px; color: var(--ink); }
+  .tl-desc{ font-size: 13px; color: var(--ink-dim); max-width: 66ch; }
+
+  /* table */
+  table{ width: 100%; border-collapse: collapse; font-size: 12.5px; }
+  th{ text-align:left; font-size: 10px; letter-spacing:.06em; color: var(--ink-faint); font-weight: 500; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+  td{ padding: 11px 10px; border-bottom: 1px solid var(--line); color: var(--ink-dim); vertical-align: top; }
+  tr td:first-child{ color: var(--ink); }
+  td.num{ font-variant-numeric: tabular-nums; color: var(--ink); white-space: nowrap; }
+  .tag{ display:inline-block; font-size: 10px; padding: 2px 7px; border: 1px solid var(--line); color: var(--ink-faint); }
+
+  /* odds chart */
+  .odds-wrap{ border: 1px solid var(--line); padding: 22px 20px 14px; }
+  .odds-top{ display:flex; justify-content:space-between; align-items:baseline; margin-bottom: 6px; }
+  .odds-now{ font-size: 30px; font-weight: 700; color: var(--gold-bright); }
+  .odds-was{ font-size: 12px; color: var(--ink-faint); }
+
+  /* scenarios */
+  .scenarios{ display:grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; }
+  @media (max-width: 780px){ .scenarios{ grid-template-columns: 1fr; } }
+  .scard{ border: 1px solid var(--line); padding: 18px; background: var(--panel); display:flex; flex-direction:column; }
+  .scard .sprob{ font-size: 11px; color: var(--ink-faint); margin-bottom: 10px; }
+  .scard .sprob b{ color: var(--gold-bright); font-size: 15px; }
+  .scard h4{ font-family:'Fraunces', Georgia, serif; font-weight:500; font-size: 17px; margin: 0 0 10px; color: var(--ink); }
+  .scard p{ font-size: 12.5px; color: var(--ink-dim); margin: 0 0 14px; flex:1; }
+  .scard .starget{ font-size: 11.5px; border-top: 1px dashed var(--line); padding-top: 12px; }
+  .scard .starget b{ color: var(--ink); }
+  .scard.base{ border-color: var(--gold); }
+
+  /* technical levels */
+  .levels{ display:grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+  @media (max-width: 640px){ .levels{ grid-template-columns: 1fr; } }
+  .lv-col-title{ font-size: 11px; letter-spacing:.06em; color: var(--ink-faint); margin-bottom: 12px; }
+  .lv-row{ display:flex; justify-content:space-between; padding: 10px 0; border-bottom: 1px solid var(--line); font-size: 13px; }
+  .lv-row .lv-name{ color: var(--ink-dim); }
+  .lv-row .lv-price{ font-weight: 600; }
+  .lv-row.r .lv-price{ color: var(--down); }
+  .lv-row.s .lv-price{ color: var(--up); }
+
+  /* history */
+  .hist-grid{ display:grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  @media (max-width: 700px){ .hist-grid{ grid-template-columns: 1fr; } }
+  .hcard{ border: 1px solid var(--line); padding: 18px; }
+  .hcard .hyear{ font-family:'Fraunces', Georgia, serif; font-size: 24px; color: var(--gold-bright); }
+  .hcard h5{ margin: 4px 0 10px; font-size: 13px; color: var(--ink); font-weight: 600; }
+  .hcard p{ font-size: 12.5px; color: var(--ink-dim); margin: 0; }
+
+  /* checklist */
+  .checklist{ display:flex; flex-direction:column; gap: 0; }
+  .chk-item{ display:flex; gap: 12px; padding: 13px 0; border-bottom: 1px solid var(--line); }
+  .chk-box{ width: 14px; height: 14px; border: 1px solid var(--ink-faint); flex-shrink:0; margin-top: 2px; }
+  .chk-text{ font-size: 13px; color: var(--ink-dim); }
+  .chk-text b{ color: var(--ink); }
+
+  footer{ margin-top: 70px; padding-top: 20px; border-top: 1px solid var(--line); font-size: 11px; color: var(--ink-faint); display:flex; justify-content:space-between; flex-wrap:wrap; gap:10px; }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <span><span class="live-pulse"></span>LIVE TONIGHT</span>
+  <span id="clock">RABU · 16 SEPT 2026</span>
+</div>
+
+<div class="wrap">
+
+  <div class="ai-bar">
+    <div class="ai-left">
+      <b>Update dengan AI</b> — tombol ini memanggil Claude (dengan akses pencarian web) untuk menarik harga & berita terbaru dan mengisi ulang halaman ini. Auto-update jalan tiap <b>10 menit</b> selama halaman ini terbuka.
+      <div id="ai-status">Belum pernah di-update sejak halaman dibuka. Auto-update pertama dalam 10:00.</div>
+    </div>
+    <button class="ai-btn" id="ai-update-btn" onclick="runAIUpdate(true)">Update Sekarang</button>
+  </div>
+
+  <div class="hero">
+    <div class="hero-date">RABU, 16 SEPTEMBER 2026 — WIB (GMT+7)</div>
+    <h1>Kisi-Kisi FOMC —<br><em>Fokus Gold</em></h1>
+    <div class="hero-sub">
+      Keputusan suku bunga <b>02:00 WIB, 17 Sept</b> (2:00 PM ET) — kemungkinan besar <b>hike pertama sejak 2023</b>.
+      Konferensi pers Ketua Warsh menyusul <b>02:30 WIB</b>. Klik <b>Update Sekarang</b> di atas kapan saja untuk menarik data & berita paling baru.
+    </div>
+
+    <div class="cd-flag">Menuju pengumuman keputusan suku bunga</div>
+    <div class="countdown" id="countdown">
+      <div class="cd-box"><div class="cd-num" id="cd-d">–</div><div class="cd-label">HARI</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-h">–</div><div class="cd-label">JAM</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-m">–</div><div class="cd-label">MENIT</div></div>
+      <div class="cd-box"><div class="cd-num" id="cd-s">–</div><div class="cd-label">DETIK</div></div>
+    </div>
+
+    <div class="grid4">
+      <div class="snap" id="snap-gold">
+        <div class="snap-label">GOLD (XAU/USD)</div>
+        <div class="snap-val" id="v-gold">$4.290</div>
+        <div class="snap-chg down" id="c-gold">▼ dekat level terendah 1 bulan</div>
+      </div>
+      <div class="snap" id="snap-dxy">
+        <div class="snap-label">DOLLAR INDEX (DXY)</div>
+        <div class="snap-val" id="v-dxy">99,71</div>
+        <div class="snap-chg up" id="c-dxy">▲ naik 5 hari beruntun</div>
+      </div>
+      <div class="snap" id="snap-odds">
+        <div class="snap-label">ODDS HIKE 25BP</div>
+        <div class="snap-val" id="v-odds" style="color:var(--gold-bright)">~93%</div>
+        <div class="snap-chg up" id="c-odds">▲ dari 56% pasca Jackson Hole</div>
+      </div>
+      <div class="snap" id="snap-wti">
+        <div class="snap-label">WTI CRUDE</div>
+        <div class="snap-val" id="v-wti">$104,7</div>
+        <div class="snap-chg up" id="c-wti">▲ +24% sebulan, syok pipa Saudi</div>
+      </div>
+    </div>
+    <div class="snapshot-note" id="snapshot-timestamp">Snapshot harga disusun manual per malam ini (15–16 Sept), sumber: Investing.com, TradingEconomics, FXStreet, CME FedWatch. Klik "Update Sekarang" untuk menarik angka terbaru.</div>
+
+    <a class="chart-link" href="https://www.tradingview.com/symbols/XAUUSD/" target="_blank" rel="noopener">
+      <div>
+        <div class="cl-title">Lihat grafik live XAU/USD</div>
+        <div class="cl-sub">Buka chart TradingView real-time di tab baru</div>
+      </div>
+      <div class="arrow">↗</div>
+    </a>
+  </div>
+
+  <!-- LIVE NEWS (AI) -->
+  <section>
+    <div class="sec-head"><span class="sec-num">•</span><span class="sec-title">Berita Terbaru (via AI)</span><div class="sec-rule"></div></div>
+    <div class="news-list" id="news-list">
+      <div class="news-empty">Belum ada hasil pencarian. Klik "Update Sekarang" di atas untuk menarik berita terbaru seputar FOMC, gold, dan minyak.</div>
+    </div>
+  </section>
+
+  <!-- 01 JADWAL -->
+  <section>
+    <div class="sec-head"><span class="sec-num">01</span><span class="sec-title">Jadwal Malam Ini</span><div class="sec-rule"></div></div>
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-time">19:30 WIB</div>
+        <div class="tl-title">Retail Sales Agustus</div>
+        <div class="tl-desc">Konsensus +0,3% MoM, setelah Juli anjlok -0,6% MoM (terburuk sejak Mei 2025). Rilis ini keluar beberapa jam sebelum keputusan FOMC — kalau jauh di bawah konsensus, bisa sedikit meredam nada hawkish di menit-menit terakhir.</div>
+      </div>
+      <div class="tl-item hot">
+        <div class="tl-time">02:00 WIB (17 Sept)</div>
+        <div class="tl-title">Keputusan Suku Bunga + Dot Plot (SEP)</div>
+        <div class="tl-desc">Pasar memberi ~93% peluang hike 25bp ke kisaran 3,75%–4,00% — hike pertama sejak 2023. Ini juga meeting Summary of Economic Projections, jadi dot plot baru soal arah suku bunga 2027 akan keluar bersamaan.</div>
+      </div>
+      <div class="tl-item hot">
+        <div class="tl-time">02:30 WIB</div>
+        <div class="tl-title">Konferensi Pers Ketua Warsh</div>
+        <div class="tl-desc">Fokus pasar: apakah nada Warsh tetap hawkish (isyarat hike lanjutan Desember) atau melunak karena data tenaga kerja mulai melemah. Ini biasanya momen volatilitas terbesar untuk gold, lebih besar dari keputusan itu sendiri.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 02 DATA PENDUKUNG -->
+  <section>
+    <div class="sec-head"><span class="sec-num">02</span><span class="sec-title">Data Pendukung — Jackson Hole s/d Sekarang</span><div class="sec-rule"></div></div>
+    <table>
+      <thead>
+        <tr><th>Tanggal</th><th>Rilis</th><th>Hasil</th><th>Konsensus</th><th>Catatan</th></tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>21–23 Agu</td><td>Jackson Hole — Pidato Ketua Warsh</td><td class="num">Hawkish</td><td>—</td>
+          <td>Warsh soroti PCE 3,7% (12bln) & 4,1% (6bln, disetahunkan) sebagai "concerning". Odds hike September melompat dari ~30% ke ~56% seketika.</td>
+        </tr>
+        <tr>
+          <td>5 Sept</td><td>Nonfarm Payrolls Agustus</td><td class="num">+162rb</td><td>+75rb</td>
+          <td>Jauh di atas ekspektasi, dari +21rb (Juli, revisi). Rata-rata 3 bulan 71rb. Menghapus argumen "pasar kerja melemah, jangan hike".</td>
+        </tr>
+        <tr>
+          <td>10 Sept</td><td>PPI Agustus</td><td class="num">+0,4% MoM / +5,4% YoY</td><td>+0,4% / +5,3%</td>
+          <td>Core PPI +0,2% MoM / +4,6% YoY. Energi jadi biang keladi — solar (diesel) melonjak +24,1%.</td>
+        </tr>
+        <tr>
+          <td>11 Sept</td><td>CPI Agustus</td><td class="num">+0,4% MoM / +3,4% YoY</td><td>+0,4% / +3,4%</td>
+          <td>Sesuai ekspektasi tapi tetap panas. Core +0,3% MoM / +2,4% YoY. "Supercore" (jasa ex-shelter) masih kuat.</td>
+        </tr>
+        <tr>
+          <td>14–15 Sept</td><td>Eskalasi harga minyak</td><td class="num">WTI +24% (1 bln)</td><td>—</td>
+          <td>Serangan drone ke pipa East-West Saudi + eskalasi Houthi di Selat Hormuz. Yield UST 10-tahun sempat tembus 5% — kombinasi langka: syok minyak + siklus hiking.</td>
+        </tr>
+        <tr>
+          <td>16 Sept, pagi</td><td>Retail Sales Agustus (Advance)</td><td class="num"><span class="tag">Ditunggu 19:30 WIB</span></td><td>+0,3% MoM</td>
+          <td>Rilis terakhir sebelum keputusan sore ini.</td>
+        </tr>
+      </tbody>
+    </table>
+  </section>
+
+  <!-- 03 ODDS -->
+  <section>
+    <div class="sec-head"><span class="sec-num">03</span><span class="sec-title">Pergeseran Odds Hike</span><div class="sec-rule"></div></div>
+    <div class="odds-wrap">
+      <div class="odds-top">
+        <div><div class="odds-now" id="odds-chart-now">93%</div></div>
+        <div class="odds-was">dari ~30% sebelum Jackson Hole (21 Agu)</div>
+      </div>
+      <svg viewBox="0 0 860 220" width="100%" height="220" preserveAspectRatio="xMidYMid meet">
+        <line x1="40" y1="10" x2="40" y2="180" stroke="#2a2a22" stroke-width="1"/>
+        <line x1="40" y1="180" x2="840" y2="180" stroke="#2a2a22" stroke-width="1"/>
+        <text x="10" y="14" fill="#625d4f" font-size="10">100%</text>
+        <text x="10" y="96" fill="#625d4f" font-size="10">50%</text>
+        <text x="18" y="184" fill="#625d4f" font-size="10">0%</text>
+        <line x1="40" y1="10" x2="840" y2="10" stroke="#1c1c16" stroke-width="1"/>
+        <line x1="40" y1="95" x2="840" y2="95" stroke="#1c1c16" stroke-width="1"/>
+        <polyline fill="none" stroke="#c9a227" stroke-width="2.5"
+          points="60,137 190,84 320,67 450,79 560,44 660,48 720,34 800,29"/>
+        <circle cx="60" cy="137" r="4" fill="#e8c34a"/>
+        <circle cx="190" cy="84" r="4" fill="#e8c34a"/>
+        <circle cx="320" cy="67" r="4" fill="#e8c34a"/>
+        <circle cx="450" cy="79" r="4" fill="#e8c34a"/>
+        <circle cx="560" cy="44" r="4" fill="#e8c34a"/>
+        <circle cx="660" cy="48" r="4" fill="#e8c34a"/>
+        <circle cx="720" cy="34" r="4" fill="#e8c34a"/>
+        <circle cx="800" cy="29" r="5" fill="#e8c34a" stroke="#0a0a0a" stroke-width="2"/>
+        <text x="45" y="205" fill="#9a9584" font-size="10">21 Agu</text>
+        <text x="170" y="205" fill="#9a9584" font-size="10">25 Agu</text>
+        <text x="300" y="205" fill="#9a9584" font-size="10">31 Agu</text>
+        <text x="430" y="205" fill="#9a9584" font-size="10">8 Sep</text>
+        <text x="540" y="205" fill="#9a9584" font-size="10">10 Sep</text>
+        <text x="640" y="205" fill="#9a9584" font-size="10">14 Sep</text>
+        <text x="700" y="205" fill="#9a9584" font-size="10">15 Sep</text>
+        <text x="760" y="205" fill="#e8c34a" font-size="10">16 Sep (now)</text>
+      </svg>
+      <div class="snapshot-note">Titik: ~30% (pra-JH) → 56% (pasca pidato Warsh) → 66% (31 Agu) → 53% (noise 8 Sep) → 85% (pasca PPI panas, 10 Sep) → 84–89% (14–15 Sep) → 93% (malam ini). Sumber: CME FedWatch, Kalshi, Polymarket, Kiplinger.</div>
+    </div>
+  </section>
+
+  <!-- 04 SKENARIO -->
+  <section>
+    <div class="sec-head"><span class="sec-num">04</span><span class="sec-title">3 Skenario Reaksi Gold</span><div class="sec-rule"></div></div>
+    <div class="scenarios">
+      <div class="scard base">
+        <div class="sprob">PROBABILITAS PASAR <b>~65%</b></div>
+        <h4>Hike 25bp + Dot Plot Hawkish</h4>
+        <p>Fed naikkan ke 3,75–4,00% dan sinyalkan kemungkinan hike lanjutan Desember karena inflasi & minyak masih panas. Skenario "sesuai ekspektasi tapi hawkish".</p>
+        <div class="starget">Gold: tekanan jual lanjutan, uji <b>$4.275</b> (SMA-50) lalu berpotensi <b>$4.202</b>. DXY & yield lanjut naik.</div>
+      </div>
+      <div class="scard">
+        <div class="sprob">PROBABILITAS PASAR <b>~25%</b></div>
+        <h4>Hike 25bp + Nada "One and Done"</h4>
+        <p>Hike dieksekusi sesuai ekspektasi, tapi Warsh menekankan kondisi tenaga kerja rapuh dan membuka opsi jeda di Desember. "Buy the fact" setelah "sell the rumor".</p>
+        <div class="starget">Gold: dip cepat di awal keputusan, lalu rebound ke <b>$4.330–4.400</b> begitu presser dimulai dan DXY melemah.</div>
+      </div>
+      <div class="scard">
+        <div class="sprob">PROBABILITAS PASAR <b>~7–10%</b></div>
+        <h4>Kejutan: Rate Ditahan</h4>
+        <p>Meski odds sudah 93%, mengingat rekam jejak dissent di rapat Juli, kejutan hold tetap mungkin jika Committee memutuskan menunggu satu data lagi.</p>
+        <div class="starget">Gold: lonjakan tajam (short squeeze), berpotensi tembus <b>$4.500</b> dalam hitungan menit. DXY jatuh cepat.</div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 05 TEKNIKAL -->
+  <section>
+    <div class="sec-head"><span class="sec-num">05</span><span class="sec-title">Level Teknikal XAU/USD</span><div class="sec-rule"></div></div>
+    <div class="levels">
+      <div>
+        <div class="lv-col-title">RESISTANCE</div>
+        <div class="lv-row r"><span class="lv-name">Barrier psikologis</span><span class="lv-price">$4.700</span></div>
+        <div class="lv-row r"><span class="lv-name">SMA-200 hari</span><span class="lv-price">$4.539</span></div>
+        <div class="lv-row r"><span class="lv-name">SMA-100 hari</span><span class="lv-price">$4.328</span></div>
+      </div>
+      <div>
+        <div class="lv-col-title">SUPPORT</div>
+        <div class="lv-row s"><span class="lv-name">SMA-50 hari</span><span class="lv-price">$4.275</span></div>
+        <div class="lv-row s"><span class="lv-name">High 6 Juli</span><span class="lv-price">$4.202</span></div>
+        <div class="lv-row s"><span class="lv-name">Low 29 Juli</span><span class="lv-price">$3.996</span></div>
+      </div>
+    </div>
+    <div class="snapshot-note" style="margin-top:14px;">RSI harian ~43 (melemah), MACD histogram negatif — bias jangka pendek sedikit bearish menjelang keputusan. Sumber: FXStreet technical desk.</div>
+  </section>
+
+  <!-- 06 ANALOGI -->
+  <section>
+    <div class="sec-head"><span class="sec-num">06</span><span class="sec-title">Analogi Historis</span><div class="sec-rule"></div></div>
+    <div class="hist-grid">
+      <div class="hcard">
+        <div class="hyear">2022</div>
+        <h5>Siklus hiking agresif</h5>
+        <p>Saat Fed mulai menaikkan suku bunga cepat untuk melawan inflasi, gold justru tertekan berat karena dolar & yield riil melonjak — baru rally kuat setelah pasar yakin Fed akan berhenti (2023). Pola: hike awal = headwind, sinyal "pause" = tailwind.</p>
+      </div>
+      <div class="hcard">
+        <div class="hyear">1990</div>
+        <h5>Syok minyak + kebijakan ketat</h5>
+        <p>Invasi Irak ke Kuwait memicu lonjakan minyak sekaligus tekanan inflasi, mirip situasi Hormuz/Saudi saat ini. Gold sempat menikmati "premi perang", tapi begitu bank sentral terbukti kredibel menjaga inflasi, premi itu mengempis lebih cepat dari perkiraan pasar.</p>
+      </div>
+    </div>
+    <div class="snapshot-note" style="margin-top:14px;">Kombinasi malam ini — hike pertama sejak 2023 <i>ditambah</i> syok pasokan minyak dari Timur Tengah — adalah gabungan yang jarang terjadi bersamaan.</div>
+  </section>
+
+  <!-- 07 CHECKLIST -->
+  <section>
+    <div class="sec-head"><span class="sec-num">07</span><span class="sec-title">Checklist Pemantauan Live</span><div class="sec-rule"></div></div>
+    <div class="checklist">
+      <div class="chk-item"><div class="chk-box"></div><div class="chk-text"><b>19:30 WIB</b> — Cek retail sales: jauh di bawah +0,3%? Bisa jadi alasan terakhir Fed ragu.</div></div>
+      <div class="chk-item"><div class="chk-box"></div><div class="chk-text"><b>02:00 WIB</b> — Baca statement resmi dulu (hike/hold, suara dissent) sebelum reaksi harga awal.</div></div>
+      <div class="chk-item"><div class="chk-box"></div><div class="chk-text"><b>Dot plot</b> — Bandingkan median 2027 dengan proyeksi Juni: naik = hawkish, turun/tetap = agak dovish.</div></div>
+      <div class="chk-item"><div class="chk-box"></div><div class="chk-text"><b>02:30 WIB</b> — Presser Warsh biasanya lebih menggerakkan pasar daripada statement itu sendiri.</div></div>
+      <div class="chk-item"><div class="chk-box"></div><div class="chk-text">Pantau DXY & yield 10-tahun bersamaan untuk membaca sinyal safe-haven geopolitik.</div></div>
+      <div class="chk-item"><div class="chk-box"></div><div class="chk-text">Klik <b>Update Sekarang</b> setiap kali lewat salah satu momen kunci di atas.</div></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Disusun 16 Sept 2026, WIB · bukan nasihat keuangan</span>
+    <span id="footer-updated">Terakhir di-update manual: 16 Sept, sore</span>
+  </footer>
+
+</div>
+
+<script>
+  // ---------- Countdown & clock ----------
+  var target = new Date("2026-09-16T14:00:00-04:00").getTime();
+  function tick(){
+    var now = new Date().getTime();
+    var diff = target - now;
+    if (diff <= 0){
+      document.getElementById('cd-d').textContent = '00';
+      document.getElementById('cd-h').textContent = '00';
+      document.getElementById('cd-m').textContent = '00';
+      document.getElementById('cd-s').textContent = '00';
+      document.querySelector('.cd-flag').textContent = 'Keputusan sudah/segera diumumkan — klik Update Sekarang';
+      return;
+    }
+    var days = Math.floor(diff / (1000*60*60*24));
+    var hours = Math.floor((diff % (1000*60*60*24)) / (1000*60*60));
+    var mins = Math.floor((diff % (1000*60*60)) / (1000*60));
+    var secs = Math.floor((diff % (1000*60)) / 1000);
+    document.getElementById('cd-d').textContent = String(days).padStart(2,'0');
+    document.getElementById('cd-h').textContent = String(hours).padStart(2,'0');
+    document.getElementById('cd-m').textContent = String(mins).padStart(2,'0');
+    document.getElementById('cd-s').textContent = String(secs).padStart(2,'0');
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  function clockUpdate(){
+    var el = document.getElementById('clock');
+    var now = new Date();
+    el.textContent = now.toLocaleString('id-ID', { weekday:'long', day:'2-digit', month:'long', year:'numeric', hour:'2-digit', minute:'2-digit', second:'2-digit' }).toUpperCase();
+  }
+  clockUpdate();
+  setInterval(clockUpdate, 1000);
+
+  // ---------- AI-powered update ----------
+  function flashCards(){
+    ['snap-gold','snap-dxy','snap-odds','snap-wti'].forEach(function(id){
+      var el = document.getElementById(id);
+      el.classList.add('flash');
+      setTimeout(function(){ el.classList.remove('flash'); }, 900);
+    });
+  }
+
+  function extractText(content){
+    return content
+      .filter(function(block){ return block.type === 'text'; })
+      .map(function(block){ return block.text; })
+      .join('\n');
+  }
+
+  function safeParseJSON(raw){
+    var cleaned = raw.trim().replace(/^```json/i, '').replace(/^```/,'').replace(/```$/,'').trim();
+    var start = cleaned.indexOf('{');
+    var end = cleaned.lastIndexOf('}');
+    if (start >= 0 && end > start){
+      cleaned = cleaned.slice(start, end + 1);
+    }
+    return JSON.parse(cleaned);
+  }
+
+  var AUTO_INTERVAL_MS = 10 * 60 * 1000;
+  var autoTimeoutId = null;
+  var nextAutoAt = Date.now() + AUTO_INTERVAL_MS;
+  var lastUpdateStamp = null;
+  var isUpdating = false;
+
+  function scheduleNextAuto(){
+    if (autoTimeoutId) clearTimeout(autoTimeoutId);
+    nextAutoAt = Date.now() + AUTO_INTERVAL_MS;
+    autoTimeoutId = setTimeout(function(){ runAIUpdate(false); }, AUTO_INTERVAL_MS);
+  }
+
+  function statusTick(){
+    if (isUpdating) return; // don't fight the "mencari data..." message
+    var status = document.getElementById('ai-status');
+    var remaining = Math.max(0, nextAutoAt - Date.now());
+    var mm = String(Math.floor(remaining / 60000)).padStart(2,'0');
+    var ss = String(Math.floor((remaining % 60000) / 1000)).padStart(2,'0');
+    var prefix = lastUpdateStamp ? ('Terakhir diperbarui AI: ' + lastUpdateStamp + ' WIB · ') : 'Belum pernah di-update sejak halaman dibuka. ';
+    status.textContent = prefix + 'Auto-update berikutnya dalam ' + mm + ':' + ss;
+  }
+  setInterval(statusTick, 1000);
+  scheduleNextAuto();
+
+  async function runAIUpdate(isManual){
+    if (isUpdating) return; // avoid overlapping calls (manual spam + auto landing together)
+    isUpdating = true;
+    var btn = document.getElementById('ai-update-btn');
+    var status = document.getElementById('ai-status');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spin"></span>Mencari data terbaru...';
+    status.textContent = (isManual ? 'Update manual: ' : 'Auto-update (10 menit): ') + 'AI sedang browsing berita & data pasar terkini...';
+
+    var systemPrompt = [
+      "Kamu adalah asisten riset pasar yang menyiapkan data untuk dashboard FOMC/gold berbahasa Indonesia.",
+      "Gunakan tool pencarian web untuk menemukan angka & berita PALING BARU (hari ini) tentang:",
+      "1) Harga emas spot XAU/USD terkini dan arah pergerakannya hari ini",
+      "2) US Dollar Index (DXY) terkini",
+      "3) Probabilitas hike 25bp Fed di FOMC ini menurut CME FedWatch/Kalshi/Polymarket terkini",
+      "4) Harga minyak WTI terkini",
+      "5) 3-4 headline berita terbaru yang relevan dengan FOMC, kebijakan Fed, atau pergerakan harga emas/minyak (ringkas beritanya dengan kalimatmu sendiri, jangan mengutip kalimat asli lebih dari beberapa kata)",
+      "PENTING: balas HANYA dengan objek JSON valid, tanpa teks pembuka/penutup, tanpa markdown fence, dengan bentuk persis:",
+      '{"gold_price":"$X.XXX","gold_change":"▲/▼ deskripsi singkat","dxy":"XX,XX","dxy_change":"▲/▼ deskripsi singkat","odds_hike":"XX%","odds_change":"▲/▼ deskripsi singkat","wti":"$XXX,X","wti_change":"▲/▼ deskripsi singkat","headlines":[{"time":"jam WIB perkiraan atau label relatif","title":"judul singkat berita","summary":"ringkasan 1-2 kalimat dengan kata-katamu sendiri"}]}',
+      "Semua teks dalam Bahasa Indonesia. Jika sebuah angka tidak ditemukan, isi dengan nilai yang sudah ada di halaman sebagai fallback daripada mengarang."
+    ].join(' ');
+
+    try {
+      var response = await fetch("https://api.anthropic.com/v1/messages", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          model: "claude-sonnet-4-6",
+          max_tokens: 1000,
+          system: systemPrompt,
+          messages: [
+            { role: "user", content: "Cari data & berita terbaru untuk dashboard FOMC/gold malam ini dan balas sesuai format JSON yang diminta." }
+          ],
+          tools: [ { type: "web_search_20250305", name: "web_search" } ]
+        })
+      });
+
+      if (!response.ok){
+        throw new Error("HTTP " + response.status);
+      }
+
+      var data = await response.json();
+      var text = extractText(data.content || []);
+      var parsed = safeParseJSON(text);
+
+      if (parsed.gold_price) document.getElementById('v-gold').textContent = parsed.gold_price;
+      if (parsed.gold_change) document.getElementById('c-gold').textContent = parsed.gold_change;
+      if (parsed.dxy) document.getElementById('v-dxy').textContent = parsed.dxy;
+      if (parsed.dxy_change) document.getElementById('c-dxy').textContent = parsed.dxy_change;
+      if (parsed.odds_hike){
+        document.getElementById('v-odds').textContent = parsed.odds_hike;
+        document.getElementById('odds-chart-now').textContent = parsed.odds_hike;
+      }
+      if (parsed.odds_change) document.getElementById('c-odds').textContent = parsed.odds_change;
+      if (parsed.wti) document.getElementById('v-wti').textContent = parsed.wti;
+      if (parsed.wti_change) document.getElementById('c-wti').textContent = parsed.wti_change;
+
+      if (parsed.headlines && parsed.headlines.length){
+        var list = document.getElementById('news-list');
+        list.innerHTML = '';
+        parsed.headlines.forEach(function(h){
+          var item = document.createElement('div');
+          item.className = 'news-item';
+          item.innerHTML = '<div class="news-time">' + (h.time || '') + '</div>' +
+                            '<div class="news-title">' + (h.title || '') + '</div>' +
+                            '<div class="news-desc">' + (h.summary || '') + '</div>';
+          list.appendChild(item);
+        });
+      }
+
+      flashCards();
+      var now = new Date();
+      lastUpdateStamp = now.toLocaleString('id-ID', { hour:'2-digit', minute:'2-digit', second:'2-digit' });
+      document.getElementById('snapshot-timestamp').textContent = 'Data ditarik otomatis oleh AI per ' + lastUpdateStamp + ' WIB (web search).' + (isManual ? '' : ' (auto-update)');
+      document.getElementById('footer-updated').textContent = 'Terakhir di-update AI: ' + lastUpdateStamp + ' WIB' + (isManual ? ' (manual)' : ' (auto)');
+
+    } catch (err){
+      console.error('AI update error:', err);
+      status.textContent = 'Gagal update (' + err.message + '). Auto-update tetap lanjut dalam 10 menit, atau klik Update Sekarang untuk coba lagi.';
+    } finally {
+      btn.disabled = false;
+      btn.textContent = 'Update Sekarang';
+      isUpdating = false;
+      scheduleNextAuto();
+    }
+  }
+</script>
+
+</body>
+</html>
